@@ -1,12 +1,12 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, \
     IsAuthenticatedOrReadOnly
 
-from api.serializers import PostSerializer, CommentSerializer, GroupSerializer, \
-    FollowSerializer
+from api.serializers import (PostSerializer, CommentSerializer,
+                             GroupSerializer, FollowSerializer)
 from .models import Post, Comment, Group, Follow
 from .permissions import IsOwnerOrReadOnly
 
@@ -36,15 +36,17 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Comment.objects.filter(post=post)
 
 
-class GroupViewSet(viewsets.ModelViewSet):
+class GroupViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
+                   viewsets.GenericViewSet):
     serializer_class = GroupSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Group.objects.all()
 
 
-class FollowViewSet(viewsets.ModelViewSet):
+class FollowViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
+                    viewsets.GenericViewSet):
     serializer_class = FollowSerializer
-    permission_classes = (IsOwnerOrReadOnly,)
+    permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Follow.objects.all()
     filter_backends = (SearchFilter,)
     search_fields = ('=user__username', '=following__username')

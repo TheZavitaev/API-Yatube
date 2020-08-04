@@ -52,3 +52,6 @@ class Follow(models.Model):
                                   on_delete=models.CASCADE,
                                   related_name='following',
                                   verbose_name='Избранный автор')
+
+    class Meta:
+        unique_together = ['user', 'following']
